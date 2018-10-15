@@ -7,7 +7,7 @@
         <table class="table table-striped">
           <thead>
             <tr>
-              <th>ID</th>
+              <!--<th>ID</th>-->
               <th>Track</th>
               <th>Song</th>
               <th>Status</th>
@@ -18,7 +18,7 @@
           </thead>
           <tbody>
             <tr v-for="licensing in licensings" :key="licensing.id">
-              <td>{{ licensing.id }}</td>
+              <!--<td>{{ licensing._id }}</td>-->
               <td>{{ licensing.track.name }}</td>
               <td>{{ licensing.song.name }}</td>
               <td>{{ licensing.status }}</td>
@@ -33,13 +33,26 @@
         <b-card :title="(model.id ? 'Edit Licensing ID#' + model.id : 'Start Licensing Process')">
           <form @submit.prevent="saveLicensing">
             <b-form-group label="Track">
-              <b-form-input type="text" v-model="model.name"></b-form-input>
+              <select v-model="model.trackId" :required="true">
+                <option :selected="true">Choose a track</option>
+                <option v-for="option in trackOptions" v-bind:value="option._id">
+                  {{ option.name }}
+                </option>
+              </select>
             </b-form-group>
             <b-form-group label="Song">
-              <b-form-input type="text" v-model="model.startTime"></b-form-input>
+              <select v-model="model.songId" :required="true">
+                <option :selected="true">Choose a song</option>
+                <option v-for="option in songOptions" v-bind:value="option._id">
+                  {{ option.name }}
+                </option>
+              </select>
             </b-form-group>
-            <b-form-group label="End time">
-              <b-form-input type="number" v-model="model.endTime"></b-form-input>
+            <b-form-group label="Status">
+              <b-form-input type="text" v-model="model.status" value="INITIAL"></b-form-input>
+            </b-form-group>
+            <b-form-group label="Contract">
+             <b-form-input type="text" v-model="model.contract"></b-form-input>
             </b-form-group>
             <div>
               <b-btn type="submit" variant="success">Start New Licensing Process</b-btn>
@@ -58,11 +71,15 @@ export default {
     return {
       loading: false,
       licensings: [],
-      model: {}
+      model: {},
+      trackOptions: [],
+      songOptions: []
     }
   },
   async created () {
     this.refreshLicensing()
+    this.trackOptions = await api.getTracks()
+    this.songOptions = await api.getSongs()
   },
   methods: {
     async refreshLicensing () {

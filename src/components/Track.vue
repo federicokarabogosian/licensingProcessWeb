@@ -7,7 +7,7 @@
         <table class="table table-striped">
           <thead>
             <tr>
-              <th>ID</th>
+              <!--<th>ID</th>-->
               <th>Movie</th>
               <th>Name</th>
               <th>Start time</th>
@@ -18,7 +18,7 @@
           </thead>
           <tbody>
             <tr v-for="track in tracks" :key="track.id">
-              <td>{{ track.id }}</td>
+              <!--<td>{{ track._id }}</td>-->
               <td>{{ track.movie.name }}</td>
               <td>{{ track.name }}</td>
               <td>{{ track.startTime }}</td>
@@ -35,6 +35,14 @@
       <b-col lg="3">
         <b-card :title="(model.id ? 'Edit Track ID#' + model.id : 'New Track')">
           <form @submit.prevent="saveTrack">
+            <b-form-group label="Movie">
+              <select v-model="model.movieId" :required="true">
+                <option :selected="true">Choose a movie</option>
+                <option v-for="option in options" v-bind:value="option._id">
+                  {{ option.name }}
+                </option>
+              </select>
+            </b-form-group>
             <b-form-group label="Name">
               <b-form-input type="text" v-model="model.name"></b-form-input>
             </b-form-group>
@@ -61,11 +69,13 @@ export default {
     return {
       loading: false,
       tracks: [],
-      model: {}
+      model: {},
+      options: []
     }
   },
   async created () {
     this.refreshTracks()
+    this.options = await api.getMovies()
   },
   methods: {
     async refreshTracks () {
@@ -80,6 +90,7 @@ export default {
       if (this.model.id) {
         await api.updateTrack(this.model.id, this.model)
       } else {
+        // model.movieId = selected
         await api.createTrack(this.model)
       }
       this.model = {} // reset form
